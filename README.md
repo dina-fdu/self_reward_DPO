@@ -1,3 +1,7 @@
+## Implementation of DPO and the paper: Self-Rewarding Language Model (Unofficial)
+
+
+------------------------------
 # Step 1:
 Tasks:
 
