@@ -21,7 +21,10 @@ class ScriptArguments:
 
     # data parameters
     beta: Optional[float] = field(default=0.1, metadata={"help": "the beta parameter for DPO loss"})
-
+    dataset_name_or_path: Optional[str] = field(
+        default="dinaaaaaa/lima_rand_sel_50_preference",
+        metadata={"help": "the location of dataset name or path"},
+    )
     # training parameters
     model_name_or_path: Optional[str] = field(
         default="../sft/results/final_checkpoint",
@@ -92,6 +95,7 @@ def get_stack_exchange_paired(
     sanity_check: bool = False,
     cache_dir: Optional[str] = None,
     num_proc=24,
+    dataset_name_or_path = None,
 ) -> Dataset:
     """Load the stack-exchange-paired dataset from Hugging Face and convert it to the necessary format.
 
@@ -106,7 +110,7 @@ def get_stack_exchange_paired(
       "Question: " + <prompt> + "\n\nAnswer: "
     """
     dataset = load_dataset(
-        "dinaaaaaa/lima_rand_sel_50_preference",
+        dataset_name_or_path,
         split="train",
         cache_dir=cache_dir,
         # data_dir=data_dir,
@@ -118,7 +122,7 @@ def get_stack_exchange_paired(
     if is_train:
         dataset = dataset.select(range(min(len(dataset), 400)))
     else:
-        dataset = dataset.select(range(400, len(dataset)))
+        dataset = dataset.select(range(len(dataset)//5 *4, len(dataset)))
 
     if sanity_check:
         dataset = dataset.select(range(min(len(dataset), 100)))
@@ -203,7 +207,7 @@ if __name__ == "__main__":
     tokenizer.pad_token = tokenizer.eos_token
 
     # 2. Load the Stack-exchange paired dataset
-    train_dataset = get_stack_exchange_paired(is_train=True, sanity_check=script_args.sanity_check)
+    train_dataset = get_stack_exchange_paired(is_train=True, sanity_check=script_args.sanity_check, dataset_name_or_path=script_args.dataset_name_or_path)
     # pdb.set_trace()
     train_dataset = train_dataset.filter(
         lambda x: len(x["prompt"]) + len(x["chosen"]) <= script_args.max_length
@@ -212,7 +216,7 @@ if __name__ == "__main__":
     # pdb.set_trace()
 
     # 3. Load evaluation dataset
-    eval_dataset = get_stack_exchange_paired(is_train=False, sanity_check=True)
+    eval_dataset = get_stack_exchange_paired(is_train=False, sanity_check=True, dataset_name_or_path=script_args.dataset_name_or_path)
     eval_dataset = eval_dataset.filter(
         lambda x: len(x["prompt"]) + len(x["chosen"]) <= script_args.max_length
         and len(x["prompt"]) + len(x["rejected"]) <= script_args.max_length
