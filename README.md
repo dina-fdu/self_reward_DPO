@@ -23,13 +23,15 @@ Tasks:
 
 Use DPO to fine tune meta/llama-2-chat. Then, sample 10 instructions that were not seen in training and generate samples. Compare the completions from the original model (meta/llama-2-chat) and your DPO fine tuned model. Display the instruction, original model completion, and DPO fine-tuned model completion as a pandas dataframe. Then, print out the dataframe to stdout. Push the PEFT adapter to huggingface.
 
+```accelerate config```
+
 Use DPO to fine tune meta/llama-2-chat:
 
 ```bash DPO_train.sh```
 
 Evaluate the model:
 
-```python eval.py```
+```python3 eval.py```
 
 Display the dataframe:
 
